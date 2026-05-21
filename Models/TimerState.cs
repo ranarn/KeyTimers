@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Windows.Media;
 
 namespace KeyTimers.Models;
@@ -15,7 +13,7 @@ public enum TimerStatus
 /// <summary>
 /// Observable runtime state bound directly to the overlay UI for one timer.
 /// </summary>
-public sealed class TimerState : INotifyPropertyChanged
+public sealed class TimerState : ObservableBase, IDisposable
 {
     private TimerStatus _status = TimerStatus.Idle;
     private double _elapsed;    // seconds elapsed since start
@@ -32,20 +30,8 @@ public sealed class TimerState : INotifyPropertyChanged
         Config    = config;
         _settings = settings;
 
-        Config.PropertyChanged += (_, _) =>
-        {
-            OnPropertyChanged(nameof(DisplayTime));
-            OnPropertyChanged(nameof(DisplayColor));
-            OnPropertyChanged(nameof(DisplayLabel));
-        };
-
-        _settings.PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName == nameof(AppSettings.ShowKeyLabel))
-                OnPropertyChanged(nameof(DisplayLabel));
-            if (e.PropertyName == nameof(AppSettings.ShowDecimal))
-                OnPropertyChanged(nameof(DisplayTime));
-        };
+        Config.PropertyChanged    += OnConfigChanged;
+        _settings.PropertyChanged += OnSettingsChanged;
     }
 
     public TimerStatus Status
@@ -122,7 +108,7 @@ public sealed class TimerState : INotifyPropertyChanged
     {
         get
         {
-            if (_isPaused)  return _settings.PauseColor;
+            if (_isPaused)    return _settings.PauseColor;
             if (_alertActive) return Config.AlertColor;
             return Config.NormalColor;
         }
@@ -133,23 +119,33 @@ public sealed class TimerState : INotifyPropertyChanged
     /// <summary>Resets elapsed time and status to idle.</summary>
     public void Reset()
     {
-        Elapsed = 0;
+        Elapsed     = 0;
         AlertActive = false;
-        Status = TimerStatus.Idle;
+        Status      = TimerStatus.Idle;
     }
 
-    // ── INotifyPropertyChanged ────────────────────────────────────────────────
+    // ── Event handlers ────────────────────────────────────────────────────────
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    private bool Set<T>(ref T field, T value, [CallerMemberName] string? name = null)
+    private void OnConfigChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-        field = value;
-        OnPropertyChanged(name);
-        return true;
+        OnPropertyChanged(nameof(DisplayTime));
+        OnPropertyChanged(nameof(DisplayColor));
+        OnPropertyChanged(nameof(DisplayLabel));
     }
 
-    private void OnPropertyChanged([CallerMemberName] string? name = null)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    private void OnSettingsChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(AppSettings.ShowKeyLabel))
+            OnPropertyChanged(nameof(DisplayLabel));
+        if (e.PropertyName == nameof(AppSettings.ShowDecimal))
+            OnPropertyChanged(nameof(DisplayTime));
+    }
+
+    // ── IDisposable ───────────────────────────────────────────────────────────
+
+    public void Dispose()
+    {
+        Config.PropertyChanged    -= OnConfigChanged;
+        _settings.PropertyChanged -= OnSettingsChanged;
+    }
 }

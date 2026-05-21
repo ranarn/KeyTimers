@@ -55,6 +55,7 @@ public sealed class TimerEngine : IDisposable
     {
         _settings = settings;
         IsPaused  = false;
+        foreach (var s in States) s.Dispose();
         States.Clear();
         foreach (var cfg in configs.Where(c => c.Enabled))
             States.Add(new TimerState(cfg, settings));

@@ -33,7 +33,7 @@ public sealed class SettingsService
             var dto  = JsonSerializer.Deserialize<SettingsDto>(json, JsonOptions);
             return dto is null ? CreateDefaults() : FromDto(dto);
         }
-        catch
+        catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
         {
             return CreateDefaults();
         }

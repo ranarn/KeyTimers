@@ -1,13 +1,11 @@
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
 namespace KeyTimers.Models;
 
 /// <summary>
 /// Global application settings persisted to disk alongside the timer list.
 /// </summary>
-public sealed class AppSettings : INotifyPropertyChanged
+public sealed class AppSettings : ObservableBase
 {
     private double _overlayLeft = 100;
     private double _overlayTop = 100;
@@ -109,14 +107,26 @@ public sealed class AppSettings : INotifyPropertyChanged
     /// <summary>Ordered list of timer configurations.</summary>
     public ObservableCollection<TimerConfig> Timers { get; set; } = [];
 
-    // ── INotifyPropertyChanged ────────────────────────────────────────────────
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    private void Set<T>(ref T field, T value, [CallerMemberName] string? name = null)
+    /// <summary>Returns a deep copy including all timer configurations.</summary>
+    public AppSettings Clone()
     {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return;
-        field = value;
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        var clone = new AppSettings
+        {
+            OverlayLeft          = OverlayLeft,
+            OverlayTop           = OverlayTop,
+            OverlayOpacity       = OverlayOpacity,
+            BackgroundColor      = BackgroundColor,
+            FontFamily           = FontFamily,
+            FontSize             = FontSize,
+            ShowKeyLabel         = ShowKeyLabel,
+            PauseKey             = PauseKey,
+            PauseColor           = PauseColor,
+            TimerBorderThickness = TimerBorderThickness,
+            TimerBorderColor     = TimerBorderColor,
+            ShowDecimal          = ShowDecimal,
+        };
+        foreach (var t in Timers)
+            clone.Timers.Add(t.Clone());
+        return clone;
     }
 }

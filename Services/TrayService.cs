@@ -15,8 +15,10 @@ public sealed class TrayService : IDisposable
     private readonly TimerEngine _engine;
     private readonly SettingsService _settingsService;
     private readonly NotifyIcon _trayIcon;
+    private readonly IntPtr _hicon;   // raw HICON from GetHicon(); freed in Dispose
 
     private OverlayWindow? _overlay;
+    private SettingsWindow? _settingsWindow;
 
     public TrayService(AppSettings settings, TimerEngine engine, SettingsService settingsService)
     {
@@ -24,10 +26,13 @@ public sealed class TrayService : IDisposable
         _engine          = engine;
         _settingsService = settingsService;
 
+        // Build the icon, track the raw HICON so we can free it later
+        (var icon, _hicon) = BuildIcon();
+
         _trayIcon = new NotifyIcon
         {
             Text    = "KeyTimers",
-            Icon    = BuildIcon(),
+            Icon    = icon,
             Visible = true,
         };
 
@@ -81,27 +86,40 @@ public sealed class TrayService : IDisposable
 
     private void OpenSettings()
     {
-        var win = new SettingsWindow(_settings, _engine, _settingsService);
-        win.Owner = _overlay;
-        win.Show();
+        // Bring the existing window to focus instead of opening a second one
+        if (_settingsWindow is { IsLoaded: true })
+        {
+            _settingsWindow.Activate();
+            return;
+        }
+
+        _settingsWindow = new SettingsWindow(_settings, _engine, _settingsService);
+        _settingsWindow.Owner = _overlay;
+        _settingsWindow.Show();
     }
 
     // ── Icon ──────────────────────────────────────────────────────────────────
 
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool DestroyIcon(IntPtr hIcon);
+
     /// <summary>
-    /// Builds a simple programmatic tray icon — avoids a file dependency at startup.
-    /// A real .ico file is referenced in the csproj for the taskbar; this is the tray copy.
+    /// Builds a simple programmatic tray icon and returns both the managed <see cref="Icon"/>
+    /// and the raw HICON handle (caller must call <see cref="DestroyIcon"/> when done).
     /// </summary>
-    private static Icon BuildIcon()
+    private static (Icon icon, IntPtr hicon) BuildIcon()
     {
-        // draw a simple "KT" icon at runtime
         using var bmp = new Bitmap(16, 16);
         using var g   = Graphics.FromImage(bmp);
         g.Clear(Color.FromArgb(30, 30, 46));
         using var brush = new SolidBrush(Color.FromArgb(137, 180, 250));
         using var font  = new Font("Arial", 6f, System.Drawing.FontStyle.Bold, GraphicsUnit.Point);
         g.DrawString("KT", font, brush, 0f, 3f);
-        return Icon.FromHandle(bmp.GetHicon());
+
+        var hicon = bmp.GetHicon();
+        // Clone the managed Icon from the HICON so it owns a copy of the image data
+        var icon = (Icon)Icon.FromHandle(hicon).Clone();
+        return (icon, hicon);
     }
 
     // ── IDisposable ───────────────────────────────────────────────────────────
@@ -109,6 +127,7 @@ public sealed class TrayService : IDisposable
     public void Dispose()
     {
         _trayIcon.Visible = false;
-        _trayIcon.Dispose();
+        _trayIcon.Dispose();   // also disposes the cloned icon set on it
+        DestroyIcon(_hicon);   // free the original HICON returned by GetHicon()
     }
 }

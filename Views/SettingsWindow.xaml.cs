@@ -27,7 +27,7 @@ public sealed partial class SettingsWindow : Window
         _settingsService = settingsService;
 
         // build a working copy so Cancel truly discards changes
-        Settings = CloneSettings(live);
+        Settings = live.Clone();
 
         InitializeComponent();
         DataContext = this;
@@ -169,25 +169,5 @@ public sealed partial class SettingsWindow : Window
             _live.Timers.Add(t.Clone());
     }
 
-    private static AppSettings CloneSettings(AppSettings src)
-    {
-        var clone = new AppSettings
-        {
-            OverlayLeft          = src.OverlayLeft,
-            OverlayTop           = src.OverlayTop,
-            OverlayOpacity       = src.OverlayOpacity,
-            BackgroundColor      = src.BackgroundColor,
-            FontFamily           = src.FontFamily,
-            FontSize             = src.FontSize,
-            ShowKeyLabel         = src.ShowKeyLabel,
-            PauseKey             = src.PauseKey,
-            PauseColor           = src.PauseColor,
-            TimerBorderThickness = src.TimerBorderThickness,
-            TimerBorderColor     = src.TimerBorderColor,
-            ShowDecimal          = src.ShowDecimal,
-        };
-        foreach (var t in src.Timers)
-            clone.Timers.Add(t.Clone());
-        return clone;
-    }
+
 }

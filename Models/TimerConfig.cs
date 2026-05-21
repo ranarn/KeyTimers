@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 
 namespace KeyTimers.Models;
@@ -41,7 +39,7 @@ public enum AlertType
 /// Mutable configuration for a single key-bound timer.
 /// Implements <see cref="INotifyPropertyChanged"/> so the settings UI reacts live.
 /// </summary>
-public sealed class TimerConfig : INotifyPropertyChanged
+public sealed class TimerConfig : ObservableBase
 {
     private string _id = Guid.NewGuid().ToString();
     private string _key = "E";
@@ -153,17 +151,6 @@ public sealed class TimerConfig : INotifyPropertyChanged
     {
         get => _autoTriggerMaxDelay;
         set => Set(ref _autoTriggerMaxDelay, Math.Max(0, value));
-    }
-
-    // ── INotifyPropertyChanged ────────────────────────────────────────────────
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    private void Set<T>(ref T field, T value, [CallerMemberName] string? name = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return;
-        field = value;
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 
     /// <summary>Returns a deep copy of this instance.</summary>
