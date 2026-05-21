@@ -61,6 +61,7 @@
           "NAudio.Core": "2.3.0"
         }
       }
-    }
+    },
+    "net10.0-windows7.0/win-x64": {}
   }
 }
