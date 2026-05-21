@@ -32,10 +32,6 @@ jobs:
           dotnet-version: '10.0.x'
           cache: true
 
-      - name: 📦 Restore
-        if: steps.release.outputs.released == 'true'
-        run: dotnet restore --locked-mode -r win-x64
-
       - name: 🚀 Publish
         if: steps.release.outputs.released == 'true'
         run: |
@@ -43,7 +39,7 @@ jobs:
             -c Release `
             -r win-x64 `
             --self-contained true `
-            --no-restore `
+            --locked-mode `
             -p:PublishSingleFile=true `
             -p:EnableCompressionInSingleFile=true `
             -p:IncludeNativeLibrariesForSelfExtract=true `
