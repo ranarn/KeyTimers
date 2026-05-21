@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -12,6 +15,8 @@ jobs:
     steps:
       - name: 🛎️ Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: ⚙️ Setup .NET
         uses: actions/setup-dotnet@v5
@@ -24,3 +29,33 @@ jobs:
 
       - name: 🔨 Build
         run: dotnet build --no-restore -c Release
+
+      - name: ✈️ Release Pilot
+        id: release
+        uses: ranarn/release-pilot@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          create-release: true
+
+      - name: 🚀 Publish
+        if: steps.release.outputs.released == 'true'
+        run: |
+          dotnet publish KeyTimers.csproj `
+            -c Release `
+            -r win-x64 `
+            --self-contained true `
+            --locked-mode `
+            -p:PublishSingleFile=true `
+            -p:EnableCompressionInSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            -o publish
+
+      - name: 🗜️ Zip
+        if: steps.release.outputs.released == 'true'
+        run: Compress-Archive -Path publish\KeyTimers.exe -DestinationPath KeyTimers-${{ steps.release.outputs.tag }}.zip -CompressionLevel Optimal
+
+      - name: 📎 Upload to release
+        if: steps.release.outputs.released == 'true'
+        run: gh release upload ${{ steps.release.outputs.tag }} KeyTimers-${{ steps.release.outputs.tag }}.zip
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
