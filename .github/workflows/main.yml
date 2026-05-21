@@ -44,7 +44,7 @@ jobs:
             -c Release `
             -r win-x64 `
             --self-contained true `
-            --locked-mode `
+            -p:RestoreLockedMode=true `
             -p:PublishSingleFile=true `
             -p:EnableCompressionInSingleFile=true `
             -p:IncludeNativeLibrariesForSelfExtract=true `
