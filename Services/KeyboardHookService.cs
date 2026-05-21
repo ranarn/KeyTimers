@@ -79,6 +79,11 @@ public sealed class KeyboardHookService : IDisposable
         using var module  = process.MainModule!;
         _hookHandle = SetWindowsHookEx(WH_KEYBOARD_LL, _proc,
             GetModuleHandle(module.ModuleName), 0);
+
+        if (_hookHandle == IntPtr.Zero)
+            throw new System.ComponentModel.Win32Exception(
+                System.Runtime.InteropServices.Marshal.GetLastWin32Error(),
+                "Failed to install keyboard hook. KeyTimers will not respond to key presses.");
     }
 
     /// <summary>Removes the hook.</summary>

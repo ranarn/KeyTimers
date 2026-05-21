@@ -7,15 +7,25 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>KeyTimers</RootNamespace>
     <AssemblyName>KeyTimers</AssemblyName>
 
+    <!-- Project metadata -->
+    <Product>KeyTimers</Product>
+    <Description>Keyboard-triggered countdown timers with a transparent overlay for Windows.</Description>
+    <Authors>ranarn</Authors>
+    <Copyright>Copyright © ranarn</Copyright>
+    <RepositoryUrl>https://github.com/ranarn/KeyTimers</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+
+    <!-- Deterministic build -->
+    <Deterministic>true</Deterministic>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors/>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="NAudio" Version="2.3.0" />
   </ItemGroup>
-
 
 </Project>
