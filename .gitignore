@@ -18,6 +18,9 @@ publish/
 *.nupkg
 packages/
 
+# NuGet lock file (causes CI conflicts with RID-specific restores)
+packages.lock.json
+
 # Personal scripts
 scripts/
 

@@ -22,10 +22,16 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
-          cache: true
+
+      - name: 📂 Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: ${{ runner.os }}-nuget-
 
       - name: 📦 Restore
-        run: dotnet restore --locked-mode
+        run: dotnet restore
 
       - name: 🔨 Build
         run: dotnet build --no-restore -c Release
@@ -44,7 +50,6 @@ jobs:
             -c Release `
             -r win-x64 `
             --self-contained true `
-            -p:RestoreLockedMode=true `
             -p:PublishSingleFile=true `
             -p:EnableCompressionInSingleFile=true `
             -p:IncludeNativeLibrariesForSelfExtract=true `
