@@ -57,10 +57,10 @@ jobs:
 
       - name: 🗜️ Zip
         if: steps.release.outputs.released == 'true'
-        run: Compress-Archive -Path publish\KeyTimers.exe -DestinationPath KeyTimers-${{ steps.release.outputs.tag }}.zip -CompressionLevel Optimal
+        run: Compress-Archive -Path publish\KeyTimers.exe -DestinationPath KeyTimers-${{ steps.release.outputs.tag }}-windows-x64.zip -CompressionLevel Optimal
 
       - name: 📎 Upload to release
         if: steps.release.outputs.released == 'true'
-        run: gh release upload ${{ steps.release.outputs.tag }} KeyTimers-${{ steps.release.outputs.tag }}.zip
+        run: gh release upload ${{ steps.release.outputs.tag }} KeyTimers-${{ steps.release.outputs.tag }}-windows-x64.zip
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
