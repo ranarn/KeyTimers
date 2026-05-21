@@ -1,0 +1,30 @@
+# Build output
+bin/
+obj/
+publish/
+
+# Compiled binaries
+*.exe
+*.zip
+*.dll
+*.pdb
+
+# User-specific files
+*.user
+*.suo
+.vs/
+
+# NuGet
+*.nupkg
+packages/
+
+# Personal scripts
+scripts/
+
+# AI tooling
+.claude/
+.serena/
+
+# OS
+Thumbs.db
+Desktop.ini

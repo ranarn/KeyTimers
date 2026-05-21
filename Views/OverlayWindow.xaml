@@ -1,0 +1,76 @@
+<Window x:Class="KeyTimers.Views.OverlayWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:KeyTimers.Views"
+        Title="KeyTimers"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight"
+        Left="{Binding Settings.OverlayLeft, Mode=TwoWay}"
+        Top="{Binding Settings.OverlayTop, Mode=TwoWay}"
+        Opacity="{Binding Settings.OverlayOpacity}">
+
+    <Window.Resources>
+        <local:HexColorConverter x:Key="HexColor"/>
+        <local:DoubleToThicknessConverter x:Key="DblThickness"/>
+    </Window.Resources>
+
+    <!-- Draggable container — transparent, no padding; background lives inside each timer border -->
+    <Border x:Name="RootBorder"
+            Background="Transparent"
+            MouseLeftButtonDown="Border_MouseLeftButtonDown"
+            Cursor="SizeAll">
+
+        <ItemsControl ItemsSource="{Binding TimerStates}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Margin="0,2"
+                            Padding="8,6"
+                            Background="{Binding DataContext.Settings.BackgroundColor,
+                                RelativeSource={RelativeSource AncestorType=ItemsControl},
+                                Converter={StaticResource HexColor}}"
+                            BorderThickness="{Binding DataContext.Settings.TimerBorderThickness,
+                                RelativeSource={RelativeSource AncestorType=ItemsControl},
+                                Converter={StaticResource DblThickness}}"
+                            BorderBrush="{Binding DataContext.Settings.TimerBorderColor,
+                                RelativeSource={RelativeSource AncestorType=ItemsControl},
+                                Converter={StaticResource HexColor}}"
+                            CornerRadius="6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Key label -->
+                            <TextBlock Grid.Column="0"
+                                       Text="{Binding DisplayLabel}"
+                                       Foreground="{Binding DisplayColor, Converter={StaticResource HexColor}}"
+                                       FontFamily="{Binding DataContext.Settings.FontFamily,
+                                           RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                       FontSize="{Binding DataContext.Settings.FontSize,
+                                           RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                       VerticalAlignment="Center"/>
+
+                            <!-- Time display -->
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding DisplayTime}"
+                                       Foreground="{Binding DisplayColor, Converter={StaticResource HexColor}}"
+                                       FontFamily="{Binding DataContext.Settings.FontFamily,
+                                           RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                       FontSize="{Binding DataContext.Settings.FontSize,
+                                           RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                       FontWeight="Bold"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Border>
+</Window>
