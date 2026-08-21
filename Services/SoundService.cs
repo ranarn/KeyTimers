@@ -29,7 +29,7 @@ public sealed class SoundService : IDisposable
         try
         {
             _reader = new AudioFileReader(filePath);
-            _player = new WaveOutEvent();
+            _player = new WaveOut();
             _player.Init(_reader);
             _player.PlaybackStopped += (_, _) => StopCurrent();
             _player.Play();
